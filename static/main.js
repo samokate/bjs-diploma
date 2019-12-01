@@ -3,8 +3,8 @@
 'use strict';
 
 class Profile {
-    constructor({userName, name: {firstName, lastName}, password}) {
-        this.userName = userName;
+    constructor({username, name: {firstName, lastName}, password}) {
+        this.username = username;
         this.name = {
             firstName,
             lastName
@@ -15,23 +15,23 @@ class Profile {
     createUser(callback) {
         return ApiConnector.createUser(
             {
-                userName: this.userName,
+                username: this.username,
                 name: this.name,
                 password: this.password
             }, (err,data) => {
-            console.log(`User ${this.userName} created`);
+            console.log(`User ${this.username} created`);
             callback(err, data);
             }
         )
     }
 
     userLogin(callback) {
-        return ApiConnector.userLogin(
+        return ApiConnector.performLogin(
             {
-                userName: this.userName,
+                username: this.username,
                 password: this.password
             }, (err, data) => {
-                console.log(`User ${this.userName} authorized`);
+                console.log(`User ${this.username} authorized`);
                 callback(err, data);
             }
         )
@@ -40,14 +40,14 @@ class Profile {
     addMoney({currency, amount}, callback) {
         return ApiConnector.addMoney({currency, amount}, (err,data) => 
             {
-                console.log(`${this.userName} added ${this.amount} ${this.currency}`);
+                console.log(`${this.username} added ${amount} ${currency} dgdg`);
                 callback(err, data);
             }
         )
     }
 
     currencyExchange({fromCurrency, targetCurrency, targetAmount}, callback) {
-            return ApiConnector.currencyExchange({fromCurrency, targetCurrency, targetAmount}, (err, data) =>
+            return ApiConnector.convertMoney({fromCurrency, targetCurrency, targetAmount}, (err, data) =>
             {
                 console.log(`${fromCurrency} exchanged to ${targetAmount} ${targetCurrency}`);
                 callback(err, data);
@@ -69,15 +69,30 @@ function getStocks(callback) {
     return ApiConnector.getStocks((err, data) => 
         {
         console.log(`Current stocks`);
-        callback(err, data[99]);
+        callback(err, data);
         }
     )
 }
 
+
+
+// решение второй части
+
 function main() {
+
+    let courses;
+    getStocks((err, data) => {
+        if (err) {
+            console.log('fdghfhdf');
+        }
+        courses = data[99].RUB_NETCOIN;
+    });
+    
+    
+
     const user1 = new Profile(
         {
-            userName: 'Vanya',
+            username: 'Vanya',
             name: {firstName: 'Ivan', lastName: 'Ivanov'},
             password: 'user1pass'
         }
@@ -85,45 +100,52 @@ function main() {
 
     const user2 = new Profile(
         {
-            userName: 'Petya',
+            username: 'Petya',
             name: {firstName: 'Petr', lastName: 'Petrov'},
             password: 'user2pass'
         }
     );
 //создаём пользователя
-    user1.createUser( (err, data) => {
+    user1.createUser((err, data) => {
         if (err) {
-            console.error(`Error during creating ${user1.userName}`);
+            console.error(`Error during creating ${user1.username}`);
         } else {
-            console.log(`User ${user1.userName} successfully created`);
+            console.log(`User ${user1.username} successfully created`);
                 //логиним юзера
             user1.userLogin( (err, data) => {
                 if (err) {
-                    console.error(`Error during authorization ${user1.userName}`);
+                    console.error(`Error during authorization ${user1.username}`);
                 } else {
-                    console.log(`User ${user1.userName} successfully logged in`);
+                    console.log(`User ${user1.username} successfully logged in`);
                     //добавляем денег в кошелек
-                    user1.addMoney({ currency: 'RUB', amount: 500000 },(err, data) => {                            
+                    let amount = 50000;
+                    let currency = 'RUB';
+                    user1.addMoney({ currency: currency, amount: amount },(err, data) => {
                         if (err) {
                             console.error('Error while adding money');
                         } else {
-                            console.log(`${user1.userName} added ${amount} ${currency}`);
+                            console.log(`${user1.username} added ${amount} ${currency}`);
                             //конвертация валют
-                            user1.currencyExchange({fromCurrency: 'RUB', targetCurrency: 'NETCOIN', targetAmount: 100}, (err, data) => {
+                            let targetAmount = amount * courses;
+                            user1.currencyExchange({fromCurrency: currency, targetCurrency: 'NETCOIN', targetAmount: targetAmount}, (err, data) => {
                                 if (err) {
+                                    console.log(err)
                                     console.error(`Error converting money from RUB to NETCOIN`);
                                 } else {
                                     console.log(`Successfully converted`);
                                     user2.createUser( (err, data) => {
                                         if (err) {
-                                        console.error(`Error during creating ${user2.userName}`);
+                                            console.log(err);
+                                            console.error(`Error during creating ${user2.username}`);
                                         } else {
-                                            console.log(`User ${user2.userName} successfully created`);
-                                            user1.transferMoney({toUser: user2.userName, amount: targetAmount}, (err, data) => {
+                                            console.log(`User ${user2.username} successfully created`);
+                                            console.log(targetAmount);
+                                            user1.transferMoney({toUser: user2.username, amount: targetAmount}, (err, data) => {
                                                 if (err) {
+                                                    console.log(err);
                                                     console.error('Transfer failed');
                                                 } else {
-                                                    console.log(`${user2} delivered ${targetAmount} NETCOINS successfully`);
+                                                    console.log(`${user2.username} delivered ${targetAmount} NETCOINS successfully`);
                                                 }
                                             });            
                                         }

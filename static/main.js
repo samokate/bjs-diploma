@@ -55,10 +55,10 @@ class Profile {
         )
     }
 
-    transferMoney({toUser, amount}, callback) {
-        return ApiConnector.transferMoney({toUser, amount}, (err, data) =>
+    transferMoney({to, amount}, callback) {
+        return ApiConnector.transferMoney({to, amount}, (err, data) =>
             {
-            console.log(`Transfer ${amount} to ${toUser}`);
+            console.log(`Transfer ${amount} to ${to}`);
             callback(err, data);
             }
         )
@@ -108,6 +108,7 @@ function main() {
 //создаём пользователя
     user1.createUser((err, data) => {
         if (err) {
+            console.log(err);
             console.error(`Error during creating ${user1.username}`);
         } else {
             console.log(`User ${user1.username} successfully created`);
@@ -140,7 +141,7 @@ function main() {
                                         } else {
                                             console.log(`User ${user2.username} successfully created`);
                                             console.log(targetAmount);
-                                            user1.transferMoney({toUser: user2.username, amount: targetAmount}, (err, data) => {
+                                            user1.transferMoney({to: user2.username, amount: targetAmount}, (err, data) => {
                                                 if (err) {
                                                     console.log(err);
                                                     console.error('Transfer failed');
